@@ -3,39 +3,55 @@ package com.example.stickersapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class Editor extends AppCompatActivity
 {
+    private static final int SELECT_IMAGE_GALLERY = 1;
+    private static final int SELECT_IMAGE_CAMERA = 1235;
+
     ImageView imgUser;
-    ImageButton btnTrash,btnSticker,btnSave,btnPhoto;
+    ImageButton btnTrash,btnSticker,btnSave,btnPhoto,btnCamera,btnGallery,btnMirror;
     RecyclerView recyclerView;
     ViewGroup viewGroup;
     ImageView selectedSticker;
     TypedArray stickerArray;
-
+    boolean openPhotoButtons = false;
+    String currentPhotoPath;
+    int scale = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,7 +64,10 @@ public class Editor extends AppCompatActivity
         btnTrash = findViewById(R.id.btnTrash);
         btnSticker = findViewById(R.id.btnSticker);
         btnSave = findViewById(R.id.btnSave);
-
+        btnPhoto = findViewById(R.id.btnPhoto);
+        btnCamera = findViewById(R.id.btnCameraE);
+        btnGallery = findViewById(R.id.btnGalleryE);
+        btnMirror = findViewById(R.id.btnMirror);
 
         imgUser = findViewById(R.id.imgSeleceted);
         viewGroup = findViewById(R.id.frmImageLayout);
@@ -101,10 +120,97 @@ public class Editor extends AppCompatActivity
             }
         });
 
+        btnPhoto.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                animatePhotoButtons();
+            }
+        });
+
+        btnGallery.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                replaceFromGallery();
+            }
+        });
+
+        btnCamera.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                replaceFromCamera();
+            }
+        });
+
+        btnMirror.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mirrorSticker();
+            }
+        });
 
 
 
 
+    }
+
+    private void mirrorSticker()
+    {
+        scale = -1*scale;
+        selectedSticker.setScaleX(scale);
+    }
+
+    private void replaceFromCamera()
+    {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        File photoFile = null;
+        try
+        {
+            photoFile = createImageFile();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        if (photoFile != null)
+        {
+            Uri photoURI = FileProvider.getUriForFile(this,
+                    "com.example.android.fileprovider",
+                    photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            startActivityForResult(takePictureIntent, SELECT_IMAGE_CAMERA);
+        }
+    }
+
+    private File createImageFile() throws IOException
+    {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+
+    private void replaceFromGallery()
+    {
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/*");
+        startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"),SELECT_IMAGE_GALLERY);
     }
 
     private void removeSticker()
@@ -222,18 +328,18 @@ public class Editor extends AppCompatActivity
 
 
                                             //Nacin 1
-//                                            Log.i("ROTATION","dX="+dX+" dY="+dY);
-//                                            double radians = Math.atan2(dY, dX);
-//                                            Log.i("ROTATION","Radians="+radians);
-//                                            float newRot = (float) Math.toDegrees(radians);
-//                                            Log.i("ROTATION","Old Angle="+oldrotation);
-//                                            Log.i("ROTATION","New Angle="+newRot);
-//
-//                                            float r = newRot - oldrotation;
-//                                            Log.i("ROTATION","Rotate to="+r);
-//                                            newSticker.setRotation((int) r);
-//                                            //oldrotation = newSticker.getRotation();
-//                                            Log.i("ROTATION","ROTATION SET");
+                                            Log.i("ROTATION","dX="+dX+" dY="+dY);
+                                            double radians = Math.atan2(dY, dX);
+                                            Log.i("ROTATION","Radians="+radians);
+                                            float newRot = (float) Math.toDegrees(radians);
+                                            Log.i("ROTATION","Old Angle="+oldrotation);
+                                            Log.i("ROTATION","New Angle="+newRot);
+
+                                            float r = newRot - oldrotation;
+                                            Log.i("ROTATION","Rotate to="+r);
+                                            newSticker.setRotation((int) r);
+                                            //oldrotation = newSticker.getRotation();
+                                            Log.i("ROTATION","ROTATION SET");
 
                                             //Nacin 2
 //                                            float dot_product = event.getX(0)*event.getX(1) + event.getY(0)*event.getY(1);
@@ -245,7 +351,7 @@ public class Editor extends AppCompatActivity
 //                                            newSticker.setRotation(angle);
 
 
-                                              //Nacin 3
+                                            //Nacin 3
 //                                            float m2 = (event.getY(1) - event.getY(0)) / (event.getX(1) - event.getX(0));
 //                                            float lineB =(float) (Math.atan(m2) * 180 / Math.PI);
 //
@@ -270,10 +376,10 @@ public class Editor extends AppCompatActivity
                                         Log.i("ROTATION","STARTPT SET");
                                         break;
                                     case MotionEvent.ACTION_DOWN :
-                                            DownPT.set(event.getX(), event.getY());
-                                            StartPT.set(newSticker.getX(), newSticker.getY());
-                                            Log.i("ACTION DOWN","DownPT x="+event.getX()+" y="+event.getY());
-                                            Log.i("ACTION DOWN","StartPT x="+newSticker.getX()+" y="+newSticker.getY());
+                                        DownPT.set(event.getX(), event.getY());
+                                        StartPT.set(newSticker.getX(), newSticker.getY());
+                                        Log.i("ACTION DOWN","DownPT x="+event.getX()+" y="+event.getY());
+                                        Log.i("ACTION DOWN","StartPT x="+newSticker.getX()+" y="+newSticker.getY());
                                         break;
 
                                     case MotionEvent.ACTION_POINTER_DOWN:
@@ -341,6 +447,68 @@ public class Editor extends AppCompatActivity
         }
     }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK)
+        {
+            if (requestCode == SELECT_IMAGE_GALLERY && data != null)
+            {
+                try
+                {
+                    Uri uri = data.getData();
+                    imgUser.setImageURI(uri);
+
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+
+            } else if (requestCode == SELECT_IMAGE_CAMERA)
+            {
+                try
+                {
+                    File f = new File(currentPhotoPath);
+                    Uri contentUri = Uri.fromFile(f);
+                    imgUser.setImageURI(contentUri);
+
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    private void animatePhotoButtons()
+    {
+        float cameraTravel;
+        float galleryTravel;
+
+        if(!openPhotoButtons)
+        {
+            cameraTravel = -200f;
+            galleryTravel = -330f;
+        }
+        else
+        {
+            cameraTravel = 0f;
+            galleryTravel = 0f;
+        }
+
+        ObjectAnimator btnCameraAnimator = ObjectAnimator.ofFloat(btnCamera,"translationY",cameraTravel);
+        btnCameraAnimator.setDuration(500);
+        btnCameraAnimator.start();
+
+        ObjectAnimator btnGalleryAnimator = ObjectAnimator.ofFloat(btnGallery,"translationY",galleryTravel);
+        btnGalleryAnimator.setDuration(500);
+        btnGalleryAnimator.start();
+
+        openPhotoButtons = !openPhotoButtons;
+    }
 
 
 

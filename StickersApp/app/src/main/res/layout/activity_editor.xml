@@ -6,6 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".Editor">
 
+    <FrameLayout
+        android:id="@+id/frmImageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="180px"
+        app:layout_constraintBottom_toTopOf="@+id/imgFooter"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgSeleceted"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="176dp"
+            tools:srcCompat="@tools:sample/avatars" />
+
+
+
+    </FrameLayout>
 
 
     <ImageView
@@ -34,44 +53,80 @@
         android:layout_width="100px"
         android:layout_height="100px"
         android:layout_marginBottom="15px"
-        android:src="@drawable/save"
-        android:scaleType="fitXY"
         android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:src="@drawable/save"
         app:layout_constraintBottom_toBottomOf="@+id/imgFooter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.957"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toEndOf="@+id/btnSticker" />
 
     <ImageButton
         android:id="@+id/btnTrash"
         android:layout_width="100px"
         android:layout_height="100px"
         android:layout_marginBottom="15px"
-        android:src="@drawable/trash"
-        android:scaleType="fitXY"
         android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="@+id/imgFooter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.042"
+        android:scaleType="fitXY"
+        android:src="@drawable/trash"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSave"
+        app:layout_constraintStart_toEndOf="@+id/btnSticker" />
+
+    <ImageButton
+        android:id="@+id/btnGalleryE"
+        android:layout_width="100px"
+        android:layout_height="100px"
+        android:layout_marginBottom="15px"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:src="@drawable/gallery"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSticker"
+        app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <FrameLayout
-        android:id="@+id/frmImageLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="180px"
-        app:layout_constraintBottom_toTopOf="@+id/imgFooter"
-        app:layout_constraintTop_toTopOf="parent">
+    <ImageButton
+        android:id="@+id/btnCameraE"
+        android:layout_width="100px"
+        android:layout_height="100px"
+        android:layout_marginBottom="15px"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:src="@drawable/camera"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSticker"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageView
-            android:id="@+id/imgSeleceted"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteX="176dp"
-            tools:srcCompat="@tools:sample/avatars" />
 
-    </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/btnPhoto"
+        android:layout_width="100px"
+        android:layout_height="100px"
+        android:layout_marginBottom="15px"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:src="@drawable/save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSticker"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+
+    <ImageButton
+        android:id="@+id/btnMirror"
+        android:layout_width="100px"
+        android:layout_height="100px"
+        android:layout_marginBottom="15px"
+        android:src="@drawable/save"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSticker"
+        app:layout_constraintStart_toEndOf="@+id/btnPhoto" />
 
 
 
