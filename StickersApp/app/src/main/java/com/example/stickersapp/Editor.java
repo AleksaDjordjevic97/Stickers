@@ -51,7 +51,6 @@ public class Editor extends AppCompatActivity
     TypedArray stickerArray;
     boolean openPhotoButtons = false;
     String currentPhotoPath;
-    int scale = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -163,7 +162,7 @@ public class Editor extends AppCompatActivity
 
     private void mirrorSticker()
     {
-        scale = -1*scale;
+        float scale = -1*selectedSticker.getScaleX();
         selectedSticker.setScaleX(scale);
     }
 
