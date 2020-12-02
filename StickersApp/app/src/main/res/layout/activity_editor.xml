@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Editor">
+
+
+
+    <ImageView
+        android:id="@+id/imgFooter"
+        android:layout_width="match_parent"
+        android:layout_height="180px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/footer"
+        tools:layout_editor_absoluteX="0dp"
+        android:scaleType="fitXY"/>
+
+    <ImageButton
+        android:id="@+id/btnSticker"
+        android:layout_width="150px"
+        android:layout_height="150px"
+        android:layout_marginBottom="4dp"
+        android:src="@drawable/sticker"
+        android:scaleType="fitXY"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/imgFooter"
+        app:layout_constraintEnd_toEndOf="@+id/imgFooter"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnSave"
+        android:layout_width="100px"
+        android:layout_height="100px"
+        android:layout_marginBottom="15px"
+        android:src="@drawable/save"
+        android:scaleType="fitXY"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/imgFooter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.957"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnTrash"
+        android:layout_width="100px"
+        android:layout_height="100px"
+        android:layout_marginBottom="15px"
+        android:src="@drawable/trash"
+        android:scaleType="fitXY"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/imgFooter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.042"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/frmImageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="180px"
+        app:layout_constraintBottom_toTopOf="@+id/imgFooter"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgSeleceted"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="176dp"
+            tools:srcCompat="@tools:sample/avatars" />
+
+    </FrameLayout>
+
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
