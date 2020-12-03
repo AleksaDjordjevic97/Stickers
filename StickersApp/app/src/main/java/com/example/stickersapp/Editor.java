@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
@@ -16,21 +15,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -72,8 +69,6 @@ public class Editor extends AppCompatActivity
         viewGroup = findViewById(R.id.frmImageLayout);
 
         stickerArray = getResources().obtainTypedArray(R.array.sticker_array);
-
-
 
         Intent getImageIntent = getIntent();
         Uri uri = getImageIntent.getParcelableExtra("SELECTED_IMAGE_URI");
@@ -162,8 +157,17 @@ public class Editor extends AppCompatActivity
 
     private void mirrorSticker()
     {
-        float scale = -1*selectedSticker.getScaleX();
-        selectedSticker.setScaleX(scale);
+
+        BitmapDrawable drawable = (BitmapDrawable) selectedSticker.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Matrix matrix = new Matrix();
+        matrix.preScale(-1, 1);
+        Bitmap reflectionImage = Bitmap.createBitmap(bitmap, 0,
+                0 , width, height, matrix, false);
+        selectedSticker.setImageBitmap(reflectionImage);
+
     }
 
     private void replaceFromCamera()
@@ -260,6 +264,7 @@ public class Editor extends AppCompatActivity
                 holder.img.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 holder.img.setImageResource(stickerArray.getResourceId(position,0));
 
+
                 holder.img.setOnClickListener(new View.OnClickListener()
                 {
                     @Override
@@ -278,16 +283,17 @@ public class Editor extends AppCompatActivity
                         newSticker.setBackgroundResource(R.drawable.sticker_border);
 
 
-
                         newSticker.setOnTouchListener(new View.OnTouchListener()
                         {
-                            PointF DownPT = new PointF();
-                            PointF StartPT = new PointF();
-                            float olddistance,oldrotation;
+
+                            float mX, mY;
+                            float olddistance;
                             float height, width;
-                            float oldK;
-                            float lineA;
-                            float m1;
+                            static final int INVALID_POINTER_ID = -1;
+                            PointF mFPoint = new PointF();
+                            PointF mSPoint = new PointF();
+                            int mPtrID1, mPtrID2;
+                            float mAngle;
 
                             @Override
                             public boolean onTouch(View v, MotionEvent event)
@@ -297,24 +303,38 @@ public class Editor extends AppCompatActivity
                                 selectedSticker = newSticker;
                                 newSticker.setBackgroundResource(R.drawable.sticker_border);
 
-                                switch (event.getAction() & MotionEvent.ACTION_MASK)
+
+                                switch (event.getActionMasked())
                                 {
 
                                     case MotionEvent.ACTION_MOVE :
+
+                                        if (mPtrID1 != INVALID_POINTER_ID && mPtrID2 != INVALID_POINTER_ID)
+                                        {
+                                            PointF nfPoint = new PointF();
+                                            PointF nsPoint = new PointF();
+
+                                            getRawPoint(event, mPtrID1, nsPoint,newSticker);
+                                            getRawPoint(event, mPtrID2, nfPoint,newSticker);
+
+                                            mAngle = angleBetweenLines(mFPoint, mSPoint, nfPoint, nsPoint);
+
+                                            newSticker.setRotation(mAngle);
+                                        }
+
+
                                         if(event.getPointerCount() == 1)
                                         {
-                                            float x =StartPT.x + event.getX() - DownPT.x;
-                                            float y = StartPT.y + event.getY() - DownPT.y;
-                                            newSticker.setX((int) (StartPT.x + event.getX() - DownPT.x));
-                                            newSticker.setY((int) (StartPT.y + event.getY() - DownPT.y));
-                                            Log.i("MOVE","Moved to x="+x+" and y="+y);
-                                            Log.i("MOVE","StartPT  x="+StartPT.x+"  y="+StartPT.y);
-                                            Log.i("MOVE","DownPT  x="+DownPT.x+"  y="+DownPT.y);
+
+                                            newSticker.animate()
+                                                    .x(event.getRawX() + mX)
+                                                    .y(event.getRawY() + mY)
+                                                    .setDuration(0)
+                                                    .start();
+
                                         }
                                         else if(event.getPointerCount() == 2)
                                         {
-                                            newSticker.setX((int) (StartPT.x + event.getX(0) - DownPT.x));
-                                            newSticker.setY((int) (StartPT.y + event.getY(0) - DownPT.y));
 
                                             final float dX =event.getX(0) - event.getX(1);
                                             final float dY =event.getY(0) - event.getY(1);
@@ -325,60 +345,16 @@ public class Editor extends AppCompatActivity
                                             FrameLayout.LayoutParams lp= new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
                                             newSticker.setLayoutParams(lp);
 
-
-                                            //Nacin 1
-                                            Log.i("ROTATION","dX="+dX+" dY="+dY);
-                                            double radians = Math.atan2(dY, dX);
-                                            Log.i("ROTATION","Radians="+radians);
-                                            float newRot = (float) Math.toDegrees(radians);
-                                            Log.i("ROTATION","Old Angle="+oldrotation);
-                                            Log.i("ROTATION","New Angle="+newRot);
-
-                                            float r = newRot - oldrotation;
-                                            Log.i("ROTATION","Rotate to="+r);
-                                            newSticker.setRotation((int) r);
-                                            //oldrotation = newSticker.getRotation();
-                                            Log.i("ROTATION","ROTATION SET");
-
-                                            //Nacin 2
-//                                            float dot_product = event.getX(0)*event.getX(1) + event.getY(0)*event.getY(1);
-//                                            float cross_product = event.getX(0)*event.getY(1) - event.getY(0)*event.getX(1);
-//                                            double angleRad = Math.atan2(Math.abs(cross_product),dot_product);
-//                                            float angle = (float) Math.toDegrees(angleRad);
-//                                            if(cross_product < 0)
-//                                                angle = (float) (360.0-angle);
-//                                            newSticker.setRotation(angle);
-
-
-                                            //Nacin 3
-//                                            float m2 = (event.getY(1) - event.getY(0)) / (event.getX(1) - event.getX(0));
-//                                            float lineB =(float) (Math.atan(m2) * 180 / Math.PI);
-//
-//                                            float angle = lineA - lineB;
-//                                            Log.i("ROTATION","LineA="+lineA);
-//                                            Log.i("ROTATION","LineB="+lineB);
-//                                            Log.i("ROTATION","Rotate to="+angle);
-
-
-
-
-
-//                                            float newK = dY/dX;
-//                                            float tgFi = (newK-oldK)/(1+oldK*newK);
-//                                            double arctgFi = Math.atan((double)tgFi);
-//                                            float newRot = oldrotation + (float)arctgFi;
-//                                            newSticker.setRotation(15*newRot);
-//                                            oldrotation = newRot;
-//                                            oldK = newK;
                                         }
-                                        StartPT.set( newSticker.getX(), newSticker.getY() );
-                                        Log.i("ROTATION","STARTPT SET");
+
                                         break;
+
                                     case MotionEvent.ACTION_DOWN :
-                                        DownPT.set(event.getX(), event.getY());
-                                        StartPT.set(newSticker.getX(), newSticker.getY());
-                                        Log.i("ACTION DOWN","DownPT x="+event.getX()+" y="+event.getY());
-                                        Log.i("ACTION DOWN","StartPT x="+newSticker.getX()+" y="+newSticker.getY());
+                                        mX = newSticker.getX() - event.getRawX();
+                                        mY = newSticker.getY() - event.getRawY();
+
+                                        mPtrID1 = event.getPointerId(event.getActionIndex());
+
                                         break;
 
                                     case MotionEvent.ACTION_POINTER_DOWN:
@@ -388,27 +364,28 @@ public class Editor extends AppCompatActivity
                                         final float odY =event.getY(0) - event.getY(1);
                                         olddistance = (float) Math.sqrt(odX * odX + odY * odY);
 
+                                        mPtrID2 = event.getPointerId(event.getActionIndex());
+                                        getRawPoint(event, mPtrID1, mSPoint,newSticker);
+                                        getRawPoint(event, mPtrID2, mFPoint,newSticker);
 
-                                        //double oradians = Math.atan2(odY, odX);
-                                        oldrotation = newSticker.getRotation();
-                                        Log.i("ACTION POINTER DOWN","odX="+odX+" odY="+odY);
-                                        Log.i("ACTION POINTER DOWN","Old Rotation="+oldrotation);
+                                        break;
 
-                                        //Nacin 3
-//                                        m1 = (event.getY(1) - event.getY(0)) / (event.getX(1) - event.getX(0));
-//                                        lineA = (float) (Math.atan(m1) * 180 / Math.PI);
-
-
-
-
+                                    case MotionEvent.ACTION_UP:
+                                        mPtrID1 = INVALID_POINTER_ID;
                                         break;
 
                                     case MotionEvent.ACTION_POINTER_UP :
                                         height = newSticker.getHeight();
                                         width = newSticker.getWidth();
-                                        oldrotation = newSticker.getRotation();
-                                        Log.i("ACTION POINTER UP","New Old Rotation="+oldrotation);
+
+                                        mPtrID2 = INVALID_POINTER_ID;
                                         break;
+
+                                    case MotionEvent.ACTION_CANCEL:
+                                        mPtrID1 = INVALID_POINTER_ID;
+                                        mPtrID2 = INVALID_POINTER_ID;
+                                        break;
+
                                     default :
                                         break;
                                 }
@@ -435,6 +412,37 @@ public class Editor extends AppCompatActivity
 
     }
 
+
+
+    void getRawPoint(MotionEvent ev, int index, PointF point,View v) {
+        final int[] location = { 0, 0 };
+        v.getLocationOnScreen(location);
+
+        float x = ev.getX(index);
+        float y = ev.getY(index);
+
+        double angle = Math.toDegrees(Math.atan2(y, x));
+        angle += v.getRotation();
+
+        final float length = PointF.length(x, y);
+
+        x = (float) (length * Math.cos(Math.toRadians(angle))) + location[0];
+        y = (float) (length * Math.sin(Math.toRadians(angle))) + location[1];
+
+        point.set(x, y);
+    }
+
+    private float angleBetweenLines(PointF fPoint, PointF sPoint, PointF nFpoint, PointF nSpoint) {
+        float angle1 = (float) Math.atan2((fPoint.y - sPoint.y), (fPoint.x - sPoint.x));
+        float angle2 = (float) Math.atan2((nFpoint.y - nSpoint.y), (nFpoint.x - nSpoint.x));
+
+        float angle = ((float) Math.toDegrees(angle1 - angle2)) % 360;
+        if (angle < -180.f) angle += 360.0f;
+        if (angle > 180.f) angle -= 360.0f;
+        return -angle;
+    }
+
+
     public class ViewHolder extends RecyclerView.ViewHolder
     {
         private ImageView img;
@@ -445,6 +453,7 @@ public class Editor extends AppCompatActivity
             img = view.findViewById(R.id.img);
         }
     }
+
 
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
