@@ -4,13 +4,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageButton;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,6 +90,9 @@ public class MainActivity extends AppCompatActivity
         return image;
     }
 
+
+
+
     private void takeCameraPhoto()
     {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -126,6 +134,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
@@ -137,6 +146,7 @@ public class MainActivity extends AppCompatActivity
                 try
                 {
                     Uri uri = data.getData();
+                    currentPhotoPath = uri.getPath();
                     goToEditor(uri);
 
                 }catch (Exception e)
@@ -153,6 +163,7 @@ public class MainActivity extends AppCompatActivity
                     File f = new File(currentPhotoPath);
                     Uri contentUri = Uri.fromFile(f);
                     goToEditor(contentUri);
+
 
                 }catch (Exception e)
                 {

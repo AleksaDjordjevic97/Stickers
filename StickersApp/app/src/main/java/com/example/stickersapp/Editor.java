@@ -28,9 +28,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -72,9 +76,11 @@ public class Editor extends AppCompatActivity
 
         Intent getImageIntent = getIntent();
         Uri uri = getImageIntent.getParcelableExtra("SELECTED_IMAGE_URI");
+
         try
         {
-            imgUser.setImageURI(uri);
+            Glide.with(this).load(uri).into(imgUser);
+
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -155,18 +161,22 @@ public class Editor extends AppCompatActivity
 
     }
 
+
     private void mirrorSticker()
     {
 
-        BitmapDrawable drawable = (BitmapDrawable) selectedSticker.getDrawable();
-        Bitmap bitmap = drawable.getBitmap();
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        Matrix matrix = new Matrix();
-        matrix.preScale(-1, 1);
-        Bitmap reflectionImage = Bitmap.createBitmap(bitmap, 0,
-                0 , width, height, matrix, false);
-        selectedSticker.setImageBitmap(reflectionImage);
+        if(selectedSticker != null)
+        {
+            BitmapDrawable drawable = (BitmapDrawable) selectedSticker.getDrawable();
+            Bitmap bitmap = drawable.getBitmap();
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            Matrix matrix = new Matrix();
+            matrix.preScale(-1, 1);
+            Bitmap reflectionImage = Bitmap.createBitmap(bitmap, 0,
+                    0, width, height, matrix, false);
+            selectedSticker.setImageBitmap(reflectionImage);
+        }
 
     }
 
@@ -188,6 +198,7 @@ public class Editor extends AppCompatActivity
             Uri photoURI = FileProvider.getUriForFile(this,
                     "com.example.android.fileprovider",
                     photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT,524288L);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             startActivityForResult(takePictureIntent, SELECT_IMAGE_CAMERA);
         }
@@ -466,7 +477,7 @@ public class Editor extends AppCompatActivity
                 try
                 {
                     Uri uri = data.getData();
-                    imgUser.setImageURI(uri);
+                    Glide.with(this).load(uri).into(imgUser);
 
                 } catch (Exception e)
                 {
@@ -480,7 +491,7 @@ public class Editor extends AppCompatActivity
                 {
                     File f = new File(currentPhotoPath);
                     Uri contentUri = Uri.fromFile(f);
-                    imgUser.setImageURI(contentUri);
+                    Glide.with(this).load(contentUri).into(imgUser);
 
                 } catch (Exception e)
                 {
