@@ -305,6 +305,7 @@ public class Editor extends AppCompatActivity
                             PointF mSPoint = new PointF();
                             int mPtrID1, mPtrID2;
                             float mAngle;
+                            float oldRotation;
 
                             @Override
                             public boolean onTouch(View v, MotionEvent event)
@@ -329,6 +330,8 @@ public class Editor extends AppCompatActivity
                                             getRawPoint(event, mPtrID2, nfPoint,newSticker);
 
                                             mAngle = angleBetweenLines(mFPoint, mSPoint, nfPoint, nsPoint);
+
+                                            mAngle = (mAngle+oldRotation)%360;
 
                                             newSticker.setRotation(mAngle);
                                         }
@@ -378,6 +381,8 @@ public class Editor extends AppCompatActivity
                                         mPtrID2 = event.getPointerId(event.getActionIndex());
                                         getRawPoint(event, mPtrID1, mSPoint,newSticker);
                                         getRawPoint(event, mPtrID2, mFPoint,newSticker);
+
+                                        oldRotation = newSticker.getRotation();
 
                                         break;
 

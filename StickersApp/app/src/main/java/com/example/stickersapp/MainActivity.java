@@ -1,4 +1,4 @@
-package com.example.stickersapp;
+ package com.example.stickersapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
