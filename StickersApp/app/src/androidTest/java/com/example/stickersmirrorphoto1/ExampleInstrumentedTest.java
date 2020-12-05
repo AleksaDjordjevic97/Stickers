@@ -1,4 +1,4 @@
-package com.example.stickersapp;
+package com.example.stickersmirrorphoto1;
 
 import android.content.Context;
 

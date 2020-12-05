@@ -1,4 +1,4 @@
-package com.example.stickersapp;
+package com.example.stickersmirrorphoto1;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -34,7 +34,6 @@ import com.bumptech.glide.Glide;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -196,7 +195,7 @@ public class Editor extends AppCompatActivity
         if (photoFile != null)
         {
             Uri photoURI = FileProvider.getUriForFile(this,
-                    "com.example.android.fileprovider",
+                    "com.example.stickersmirrorphoto1.fileprovider",
                     photoFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT,524288L);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);

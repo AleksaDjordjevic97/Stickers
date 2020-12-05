@@ -1,11 +1,9 @@
- package com.example.stickersapp;
+ package com.example.stickersmirrorphoto1;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,9 +11,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageButton;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -109,7 +105,7 @@ public class MainActivity extends AppCompatActivity
         if (photoFile != null)
         {
             Uri photoURI = FileProvider.getUriForFile(this,
-                    "com.example.android.fileprovider",
+                    "com.example.stickersmirrorphoto1.fileprovider",
                     photoFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             startActivityForResult(takePictureIntent, SELECT_IMAGE_CAMERA);
