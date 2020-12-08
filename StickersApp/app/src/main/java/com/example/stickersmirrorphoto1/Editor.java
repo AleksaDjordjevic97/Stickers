@@ -335,18 +335,13 @@ public class Editor extends AppCompatActivity
                                             newSticker.setRotation(mAngle);
                                         }
 
+                                        newSticker.animate()
+                                                .x(event.getRawX() + mX)
+                                                .y(event.getRawY() + mY)
+                                                .setDuration(0)
+                                                .start();
 
-                                        if(event.getPointerCount() == 1)
-                                        {
-
-                                            newSticker.animate()
-                                                    .x(event.getRawX() + mX)
-                                                    .y(event.getRawY() + mY)
-                                                    .setDuration(0)
-                                                    .start();
-
-                                        }
-                                        else if(event.getPointerCount() == 2)
+                                        if(event.getPointerCount() == 2)
                                         {
 
                                             final float dX =event.getX(0) - event.getX(1);

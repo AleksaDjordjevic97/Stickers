@@ -142,7 +142,6 @@ public class MainActivity extends AppCompatActivity
                 try
                 {
                     Uri uri = data.getData();
-                    currentPhotoPath = uri.getPath();
                     goToEditor(uri);
 
                 }catch (Exception e)
