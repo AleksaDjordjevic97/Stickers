@@ -1,4 +1,4 @@
- package com.example.stickersmirrorphoto1;
+ package com.example.stickersmirrorphoto2;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
