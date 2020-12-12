@@ -305,6 +305,7 @@ public class Editor extends AppCompatActivity
                             int mPtrID1, mPtrID2;
                             float mAngle;
                             float oldRotation;
+                            boolean modeMove = true;
 
                             @Override
                             public boolean onTouch(View v, MotionEvent event)
@@ -320,29 +321,15 @@ public class Editor extends AppCompatActivity
 
                                     case MotionEvent.ACTION_MOVE :
 
-                                        if (mPtrID1 != INVALID_POINTER_ID && mPtrID2 != INVALID_POINTER_ID)
-                                        {
-                                            PointF nfPoint = new PointF();
-                                            PointF nsPoint = new PointF();
-
-                                            getRawPoint(event, mPtrID1, nsPoint,newSticker);
-                                            getRawPoint(event, mPtrID2, nfPoint,newSticker);
-
-                                            mAngle = angleBetweenLines(mFPoint, mSPoint, nfPoint, nsPoint);
-
-                                            mAngle = (mAngle+oldRotation)%360;
-
-                                            newSticker.setRotation(mAngle);
-                                        }
-
-                                        newSticker.animate()
-                                                .x(event.getRawX() + mX)
-                                                .y(event.getRawY() + mY)
-                                                .setDuration(0)
-                                                .start();
-
                                         if(event.getPointerCount() == 2)
                                         {
+                                            modeMove = false;
+
+                                            newSticker.animate()
+                                                    .x(event.getRawX() + mX)
+                                                    .y(event.getRawY() + mY)
+                                                    .setDuration(0)
+                                                    .start();
 
                                             final float dX =event.getX(0) - event.getX(1);
                                             final float dY =event.getY(0) - event.getY(1);
@@ -353,6 +340,29 @@ public class Editor extends AppCompatActivity
                                             FrameLayout.LayoutParams lp= new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
                                             newSticker.setLayoutParams(lp);
 
+                                            if (mPtrID1 != INVALID_POINTER_ID && mPtrID2 != INVALID_POINTER_ID)
+                                            {
+                                                PointF nfPoint = new PointF();
+                                                PointF nsPoint = new PointF();
+
+                                                getRawPoint(event, mPtrID1, nsPoint,newSticker);
+                                                getRawPoint(event, mPtrID2, nfPoint,newSticker);
+
+                                                mAngle = angleBetweenLines(mFPoint, mSPoint, nfPoint, nsPoint);
+
+                                                mAngle = (mAngle+oldRotation)%360;
+
+                                                newSticker.setRotation(mAngle);
+                                            }
+
+                                        }
+                                        else if(event.getPointerCount() == 1 && modeMove)
+                                        {
+                                            newSticker.animate()
+                                                    .x(event.getRawX() + mX)
+                                                    .y(event.getRawY() + mY)
+                                                    .setDuration(0)
+                                                    .start();
                                         }
 
                                         break;
@@ -381,6 +391,7 @@ public class Editor extends AppCompatActivity
                                         break;
 
                                     case MotionEvent.ACTION_UP:
+                                        modeMove = true;
                                         mPtrID1 = INVALID_POINTER_ID;
                                         break;
 
