@@ -1,4 +1,4 @@
-package com.example.stickersmirrorphoto2;
+package com.example.stickersbuttonframe;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -44,13 +46,14 @@ public class Editor extends AppCompatActivity
     private static final int SELECT_IMAGE_CAMERA = 1235;
 
     ImageView imgUser;
-    ImageButton btnTrash,btnSticker,btnSave,btnPhoto,btnCamera,btnGallery,btnMirror;
+    ImageButton btnSticker,btnSave,btnPhoto,btnCamera,btnGallery;
     RecyclerView recyclerView;
     ViewGroup viewGroup;
-    ImageView selectedSticker;
+    View selectedSticker;
     TypedArray stickerArray;
     boolean openPhotoButtons = false;
     String currentPhotoPath;
+    FrameLayout frm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -59,14 +62,12 @@ public class Editor extends AppCompatActivity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_editor);
 
-
-        btnTrash = findViewById(R.id.btnTrash);
+        frm = findViewById(R.id.frmImageLayout);
         btnSticker = findViewById(R.id.btnSticker);
         btnSave = findViewById(R.id.btnSave);
         btnPhoto = findViewById(R.id.btnPhoto);
         btnCamera = findViewById(R.id.btnCameraE);
         btnGallery = findViewById(R.id.btnGalleryE);
-        btnMirror = findViewById(R.id.btnMirror);
 
         imgUser = findViewById(R.id.imgSeleceted);
         viewGroup = findViewById(R.id.frmImageLayout);
@@ -85,14 +86,6 @@ public class Editor extends AppCompatActivity
             e.printStackTrace();
         }
 
-        btnTrash.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                removeSticker();
-            }
-        });
 
         btnSave.setOnClickListener(new View.OnClickListener()
         {
@@ -146,14 +139,16 @@ public class Editor extends AppCompatActivity
             }
         });
 
-        btnMirror.setOnClickListener(new View.OnClickListener()
+
+        frm.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                mirrorSticker();
+                deselectSticker();
             }
         });
+
 
 
 
@@ -166,7 +161,8 @@ public class Editor extends AppCompatActivity
 
         if(selectedSticker != null)
         {
-            BitmapDrawable drawable = (BitmapDrawable) selectedSticker.getDrawable();
+            ImageView stickerImage = selectedSticker.findViewById(R.id.imgSticker);
+            BitmapDrawable drawable = (BitmapDrawable) stickerImage.getDrawable();
             Bitmap bitmap = drawable.getBitmap();
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
@@ -174,7 +170,7 @@ public class Editor extends AppCompatActivity
             matrix.preScale(-1, 1);
             Bitmap reflectionImage = Bitmap.createBitmap(bitmap, 0,
                     0, width, height, matrix, false);
-            selectedSticker.setImageBitmap(reflectionImage);
+            stickerImage.setImageBitmap(reflectionImage);
         }
 
     }
@@ -195,7 +191,7 @@ public class Editor extends AppCompatActivity
         if (photoFile != null)
         {
             Uri photoURI = FileProvider.getUriForFile(this,
-                    "com.example.stickersmirrorphoto1.fileprovider",
+                    "com.example.stickersapp.fileprovider",
                     photoFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT,524288L);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -233,11 +229,7 @@ public class Editor extends AppCompatActivity
 
     private void saveImage() throws FileNotFoundException
     {
-        if(selectedSticker != null)
-        {
-            selectedSticker.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            selectedSticker = null;
-        }
+        deselectSticker();
         viewGroup.setDrawingCacheEnabled(true);
         viewGroup.buildDrawingCache();
         Bitmap bm = viewGroup.getDrawingCache();
@@ -281,24 +273,111 @@ public class Editor extends AppCompatActivity
                     public void onClick(View v)
                     {
 
-                        final ImageView newSticker = new ImageView(getApplicationContext());
-                        newSticker.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT));
+                        final View newStickerView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.sticker_layout,viewGroup,false);
+                        final ImageView newSticker = newStickerView.findViewById(R.id.imgSticker);
                         Bitmap sticker = BitmapFactory.decodeResource(getResources(),stickerArray.getResourceId(position,0));
                         newSticker.setImageBitmap(sticker);
-                        viewGroup.addView(newSticker);
+                        final ImageButton btnRemoveSticker = newStickerView.findViewById(R.id.btnRemoveSticker);
+                        final ImageButton btnMirrorSticker = newStickerView.findViewById(R.id.btnMirrorSticker);
+                        final ImageButton btnScaleSticker = newStickerView.findViewById(R.id.btnScaleSticker);
 
-                        if(selectedSticker != null)
-                            selectedSticker.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                        selectedSticker = newSticker;
-                        newSticker.setBackgroundResource(R.drawable.sticker_border);
+                        btnRemoveSticker.setOnClickListener(new View.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(View v)
+                            {
+                                removeSticker();
+                            }
+                        });
+
+                        btnMirrorSticker.setOnClickListener(new View.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(View v)
+                            {
+                                mirrorSticker();
+                            }
+                        });
 
 
-                        newSticker.setOnTouchListener(new View.OnTouchListener()
+
+                        viewGroup.addView(newStickerView);
+                        selectNewSticker(newStickerView);
+
+                        btnScaleSticker.setOnTouchListener(new View.OnTouchListener()
+                        {
+                            float sX,sY,nX,nY;
+                            float height = 0,width = 0;
+
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event)
+                            {
+
+
+                                switch (event.getActionMasked())
+                                {
+
+
+                                    case MotionEvent.ACTION_MOVE:
+
+                                        if(event.getPointerCount() == 1)
+                                        {
+
+                                            nX = event.getRawX();
+                                            nY = event.getRawY();
+//                                            if((nX > sX && nY > sY) || (nX < sX && nY < sY))
+//                                            {
+                                            float dX = nX - sX;
+                                            float dY = nY - sY;
+                                            float distance = (float) Math.sqrt(dX * dX + dY * dY);
+                                            float newDistance = distance / ((float) Math.sqrt(2));
+//                                                if (nX < sX && nY < sY)
+//                                                    newDistance *= -1;
+//                                                float newWidth = ((width + newDistance > 100) ? (width + newDistance) : 100);
+//                                                float newHeight = ((height + newDistance > 100) ? (height + newDistance) : 100);
+//                                                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
+//                                                RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams((int) (newWidth - 20), (int) (newHeight - 20));
+//                                                newStickerView.setLayoutParams(lp);
+//                                                newSticker.setLayoutParams(lp2);
+//                                            }
+                                            newDistance = calculateDistanceFromCurAngle(newStickerView,sX,sY,nX,nY,newDistance);
+
+
+                                            float newWidth = ((width + newDistance > 100) ? (width + newDistance) : 100);
+                                            float newHeight = ((height + newDistance > 100) ? (height + newDistance) : 100);
+                                            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
+                                            RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams((int) (newWidth - 20), (int) (newHeight - 20));
+                                            newStickerView.setLayoutParams(lp);
+                                            newSticker.setLayoutParams(lp2);
+
+                                        }
+
+                                        break;
+
+                                    case MotionEvent.ACTION_DOWN:
+
+                                        height = newStickerView.getHeight();
+                                        width = newStickerView.getWidth();
+                                        sX = event.getRawX();
+                                        sY = event.getRawY();
+
+                                        break;
+
+                                        default:
+                                            break;
+                                }
+                                return true;
+                            }
+                        });
+
+
+
+                        newStickerView.setOnTouchListener(new View.OnTouchListener()
                         {
 
                             float mX, mY;
-                            float olddistance;
-                            float height, width;
+                           // float olddistance;
+                           // float height, width;
                             static final int INVALID_POINTER_ID = -1;
                             PointF mFPoint = new PointF();
                             PointF mSPoint = new PointF();
@@ -310,11 +389,7 @@ public class Editor extends AppCompatActivity
                             @Override
                             public boolean onTouch(View v, MotionEvent event)
                             {
-                                if(selectedSticker != null)
-                                    selectedSticker.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                                selectedSticker = newSticker;
-                                newSticker.setBackgroundResource(R.drawable.sticker_border);
-
+                                selectNewSticker(newStickerView);
 
                                 switch (event.getActionMasked())
                                 {
@@ -325,40 +400,43 @@ public class Editor extends AppCompatActivity
                                         {
                                             modeMove = false;
 
-                                            newSticker.animate()
-                                                    .x(event.getRawX() + mX)
-                                                    .y(event.getRawY() + mY)
-                                                    .setDuration(0)
-                                                    .start();
+//                                            newSticker.animate()
+//                                                    .x(event.getRawX() + mX)
+//                                                    .y(event.getRawY() + mY)
+//                                                    .setDuration(0)
+//                                                    .start();
 
-                                            final float dX =event.getX(0) - event.getX(1);
-                                            final float dY =event.getY(0) - event.getY(1);
-                                            float newdistance = (float) Math.sqrt(dX * dX + dY * dY);
-                                            float distance = newdistance - olddistance;
-                                            float newWidth = ((width+distance > 150) ? (width + distance) : 150 );
-                                            float newHeight = ((height+distance > 150) ? (height + distance) : 150 );
-                                            FrameLayout.LayoutParams lp= new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
-                                            newSticker.setLayoutParams(lp);
+                                          //  final float dX =event.getX(0) - event.getX(1);
+                                           // final float dY =event.getY(0) - event.getY(1);
+                                           // float newdistance = (float) Math.sqrt(dX * dX + dY * dY);
+                                          //  float distance = newdistance - olddistance;
+                                          //  float newWidth = ((width+distance > 150) ? (width + distance) : 150 );
+                                          //  float newHeight = ((height+distance > 150) ? (height + distance) : 150 );
+//                                            FrameLayout.LayoutParams lp= new FrameLayout.LayoutParams(newStickerView.getWidth(),newStickerView.getHeight());
+//                                            newStickerView.setLayoutParams(lp);
 
                                             if (mPtrID1 != INVALID_POINTER_ID && mPtrID2 != INVALID_POINTER_ID)
                                             {
                                                 PointF nfPoint = new PointF();
                                                 PointF nsPoint = new PointF();
 
-                                                getRawPoint(event, mPtrID1, nsPoint,newSticker);
-                                                getRawPoint(event, mPtrID2, nfPoint,newSticker);
+                                                getRawPoint(event, mPtrID1, nsPoint,newStickerView);
+                                                getRawPoint(event, mPtrID2, nfPoint,newStickerView);
 
                                                 mAngle = angleBetweenLines(mFPoint, mSPoint, nfPoint, nsPoint);
 
                                                 mAngle = (mAngle+oldRotation)%360;
 
-                                                newSticker.setRotation(mAngle);
+                                                newSticker.setPivotX(newSticker.getWidth()/2);
+                                                newSticker.setPivotY(newSticker.getHeight()/2);
+
+                                                newStickerView.setRotation(mAngle);
                                             }
 
                                         }
                                         else if(event.getPointerCount() == 1 && modeMove)
                                         {
-                                            newSticker.animate()
+                                            newStickerView.animate()
                                                     .x(event.getRawX() + mX)
                                                     .y(event.getRawY() + mY)
                                                     .setDuration(0)
@@ -368,25 +446,25 @@ public class Editor extends AppCompatActivity
                                         break;
 
                                     case MotionEvent.ACTION_DOWN :
-                                        mX = newSticker.getX() - event.getRawX();
-                                        mY = newSticker.getY() - event.getRawY();
+                                        mX = newStickerView.getX() - event.getRawX();
+                                        mY = newStickerView.getY() - event.getRawY();
 
                                         mPtrID1 = event.getPointerId(event.getActionIndex());
 
                                         break;
 
                                     case MotionEvent.ACTION_POINTER_DOWN:
-                                        height = newSticker.getHeight();
-                                        width = newSticker.getWidth();
-                                        final float odX =event.getX(0) - event.getX(1);
-                                        final float odY =event.getY(0) - event.getY(1);
-                                        olddistance = (float) Math.sqrt(odX * odX + odY * odY);
+//                                        height = newStickerView.getHeight();
+//                                        width = newStickerView.getWidth();
+//                                        final float odX =event.getX(0) - event.getX(1);
+//                                        final float odY =event.getY(0) - event.getY(1);
+//                                        olddistance = (float) Math.sqrt(odX * odX + odY * odY);
 
                                         mPtrID2 = event.getPointerId(event.getActionIndex());
-                                        getRawPoint(event, mPtrID1, mSPoint,newSticker);
-                                        getRawPoint(event, mPtrID2, mFPoint,newSticker);
+                                        getRawPoint(event, mPtrID1, mSPoint,newStickerView);
+                                        getRawPoint(event, mPtrID2, mFPoint,newStickerView);
 
-                                        oldRotation = newSticker.getRotation();
+                                        oldRotation = newStickerView.getRotation();
 
                                         break;
 
@@ -396,8 +474,8 @@ public class Editor extends AppCompatActivity
                                         break;
 
                                     case MotionEvent.ACTION_POINTER_UP :
-                                        height = newSticker.getHeight();
-                                        width = newSticker.getWidth();
+//                                        height = newStickerView.getHeight();
+//                                        width = newStickerView.getWidth();
 
                                         mPtrID2 = INVALID_POINTER_ID;
                                         break;
@@ -418,6 +496,8 @@ public class Editor extends AppCompatActivity
 
                     }
                 });
+
+
             }
 
 
@@ -461,6 +541,79 @@ public class Editor extends AppCompatActivity
         if (angle < -180.f) angle += 360.0f;
         if (angle > 180.f) angle -= 360.0f;
         return -angle;
+    }
+
+    private float calculateDistanceFromCurAngle(View view, float sX, float sY, float nX, float nY, float newDistance)
+    {
+        float rot = view.getRotation();
+        if(rot < 0)
+            rot+=360;
+
+        Log.d("ROTATION",""+rot);
+
+        if ((rot >= 0 && rot < 45) || rot >= 316)
+        {
+            Log.d("ROTATION","45-1");
+            if (nX < sX && nY < sY)
+                newDistance *= -1;
+            else if (!(nX > sX && nY > sY))
+                newDistance = 0;
+        } else if (rot >= 46 && rot < 135)
+        {
+            Log.d("ROTATION","45-2");
+            if (nX > sX && nY < sY)
+                newDistance *= -1;
+            else if (!(nX < sX && nY > sY))
+                newDistance = 0;
+        } else if (rot >= 136 && rot < 225)
+        {
+            Log.d("ROTATION","45-3");
+            if (nX > sX && nY > sY)
+                newDistance *= -1;
+            else if (!(nX < sX && nY < sY))
+                newDistance = 0;
+        } else if (rot >= 226 && rot < 315)
+        {
+            Log.d("ROTATION","45-4");
+            if (nX < sX && nY > sY)
+                newDistance *= -1;
+            else if (!(nX > sX && nY < sY))
+                newDistance = 0;
+        }
+        else if(rot >= 45 && rot < 46)
+        {
+            Log.d("ROTATION","45");
+            if (nY < sY)
+                newDistance *= -1;
+            else if (!(nY > sY))
+                newDistance = 0;
+        }
+        else if(rot >= 135 && rot < 136)
+        {
+            Log.d("ROTATION","45-135");
+            if (nX > sX)
+                newDistance *= -1;
+            else if (!(nX < sX))
+                newDistance = 0;
+        }
+        else if(rot >= 225 && rot < 226)
+        {
+            Log.d("ROTATION","45-225");
+            if (nY > sY)
+                newDistance *= -1;
+            else if (!(nY < sY))
+                newDistance = 0;
+        }
+        else if(rot >= 315 && rot < 316)
+        {Log.d("ROTATION","45-315");
+            if (nX < sX)
+                newDistance *= -1;
+            else if (!(nX > sX))
+                newDistance = 0;
+        }
+
+        return newDistance;
+
     }
 
 
@@ -537,6 +690,52 @@ public class Editor extends AppCompatActivity
         btnGalleryAnimator.start();
 
         openPhotoButtons = !openPhotoButtons;
+    }
+
+    private void deselectSticker()
+    {
+        ImageView stickerImage;
+        ImageButton btnRemove,btnMirror,btnScale;
+        if(selectedSticker != null)
+        {
+            stickerImage = selectedSticker.findViewById(R.id.imgSticker);
+            btnRemove = selectedSticker.findViewById(R.id.btnRemoveSticker);
+            btnMirror = selectedSticker.findViewById(R.id.btnMirrorSticker);
+            btnScale = selectedSticker.findViewById(R.id.btnScaleSticker);
+            stickerImage.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            btnRemove.setVisibility(View.GONE);
+            btnMirror.setVisibility(View.GONE);
+            btnScale.setVisibility(View.GONE);
+
+            selectedSticker = null;
+        }
+
+    }
+
+    private void selectNewSticker(View newSticker)
+    {
+        ImageView stickerImage;
+        ImageButton btnRemove,btnMirror,btnScale;
+
+        deselectSticker();
+
+        selectedSticker = newSticker;
+        stickerImage = selectedSticker.findViewById(R.id.imgSticker);
+        btnRemove = selectedSticker.findViewById(R.id.btnRemoveSticker);
+        btnMirror = selectedSticker.findViewById(R.id.btnMirrorSticker);
+        btnScale = selectedSticker.findViewById(R.id.btnScaleSticker);
+
+        stickerImage.setBackgroundResource(R.drawable.sticker_border);
+        btnRemove.setVisibility(View.VISIBLE);
+        btnMirror.setVisibility(View.VISIBLE);
+        btnScale.setVisibility(View.VISIBLE);
+
+
+    }
+
+    private void scaleSticker()
+    {
+
     }
 
 

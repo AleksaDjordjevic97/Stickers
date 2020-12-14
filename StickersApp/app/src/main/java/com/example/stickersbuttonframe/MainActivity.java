@@ -1,4 +1,4 @@
- package com.example.stickersmirrorphoto2;
+ package com.example.stickersbuttonframe;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity
         if (photoFile != null)
         {
             Uri photoURI = FileProvider.getUriForFile(this,
-                    "com.example.stickersmirrorphoto1.fileprovider",
+                    "com.example.stickersapp.fileprovider",
                     photoFile);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             startActivityForResult(takePictureIntent, SELECT_IMAGE_CAMERA);

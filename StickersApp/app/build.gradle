@@ -5,7 +5,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "com.example.stickersmirrorphoto2"
+        applicationId "com.example.stickersbuttonframe"
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1

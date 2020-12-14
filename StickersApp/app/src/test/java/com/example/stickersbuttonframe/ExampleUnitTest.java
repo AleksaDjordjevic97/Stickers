@@ -1,4 +1,4 @@
-package com.example.stickersmirrorphoto2;
+package com.example.stickersbuttonframe;
 
 import org.junit.Test;
 

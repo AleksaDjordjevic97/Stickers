@@ -58,19 +58,7 @@
         android:src="@drawable/save"
         app:layout_constraintBottom_toBottomOf="@+id/imgFooter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.75"
-        app:layout_constraintStart_toEndOf="@+id/btnSticker" />
-
-    <ImageButton
-        android:id="@+id/btnTrash"
-        android:layout_width="100px"
-        android:layout_height="100px"
-        android:layout_marginBottom="15px"
-        android:background="@android:color/transparent"
-        android:scaleType="fitXY"
-        android:src="@drawable/trash"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnSave"
+        app:layout_constraintHorizontal_bias="0.90"
         app:layout_constraintStart_toEndOf="@+id/btnSticker" />
 
     <ImageButton
@@ -83,7 +71,7 @@
         android:src="@drawable/gallery_square"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSticker"
-        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintHorizontal_bias="0.10"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
@@ -96,7 +84,7 @@
         android:src="@drawable/camera_square"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSticker"
-        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintHorizontal_bias="0.10"
         app:layout_constraintStart_toStartOf="parent" />
 
 
@@ -111,26 +99,8 @@
         android:src="@drawable/photo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSticker"
-        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintHorizontal_bias="0.10"
         app:layout_constraintStart_toStartOf="parent" />
-
-
-
-    <ImageButton
-        android:id="@+id/btnMirror"
-        android:layout_width="100px"
-        android:layout_height="100px"
-        android:layout_marginBottom="15px"
-        android:src="@drawable/mirror"
-        android:background="@android:color/transparent"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnSticker"
-        app:layout_constraintStart_toEndOf="@+id/btnPhoto" />
-
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
