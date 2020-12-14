@@ -325,24 +325,13 @@ public class Editor extends AppCompatActivity
 
                                             nX = event.getRawX();
                                             nY = event.getRawY();
-//                                            if((nX > sX && nY > sY) || (nX < sX && nY < sY))
-//                                            {
                                             float dX = nX - sX;
                                             float dY = nY - sY;
                                             float distance = (float) Math.sqrt(dX * dX + dY * dY);
                                             float newDistance = distance / ((float) Math.sqrt(2));
-//                                                if (nX < sX && nY < sY)
-//                                                    newDistance *= -1;
-//                                                float newWidth = ((width + newDistance > 100) ? (width + newDistance) : 100);
-//                                                float newHeight = ((height + newDistance > 100) ? (height + newDistance) : 100);
-//                                                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
-//                                                RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams((int) (newWidth - 20), (int) (newHeight - 20));
-//                                                newStickerView.setLayoutParams(lp);
-//                                                newSticker.setLayoutParams(lp2);
-//                                            }
+
                                             newDistance = calculateDistanceFromCurAngle(newStickerView,sX,sY,nX,nY,newDistance);
-
-
+                                            
                                             float newWidth = ((width + newDistance > 100) ? (width + newDistance) : 100);
                                             float newHeight = ((height + newDistance > 100) ? (height + newDistance) : 100);
                                             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
@@ -543,6 +532,7 @@ public class Editor extends AppCompatActivity
         return -angle;
     }
 
+
     private float calculateDistanceFromCurAngle(View view, float sX, float sY, float nX, float nY, float newDistance)
     {
         float rot = view.getRotation();
@@ -551,66 +541,24 @@ public class Editor extends AppCompatActivity
 
         Log.d("ROTATION",""+rot);
 
-        if ((rot >= 0 && rot < 45) || rot >= 316)
+        if (rot >= 0 && rot < 90)
         {
-            Log.d("ROTATION","45-1");
-            if (nX < sX && nY < sY)
-                newDistance *= -1;
-            else if (!(nX > sX && nY > sY))
-                newDistance = 0;
-        } else if (rot >= 46 && rot < 135)
-        {
-            Log.d("ROTATION","45-2");
-            if (nX > sX && nY < sY)
-                newDistance *= -1;
-            else if (!(nX < sX && nY > sY))
-                newDistance = 0;
-        } else if (rot >= 136 && rot < 225)
-        {
-            Log.d("ROTATION","45-3");
-            if (nX > sX && nY > sY)
-                newDistance *= -1;
-            else if (!(nX < sX && nY < sY))
-                newDistance = 0;
-        } else if (rot >= 226 && rot < 315)
-        {
-            Log.d("ROTATION","45-4");
-            if (nX < sX && nY > sY)
-                newDistance *= -1;
-            else if (!(nX > sX && nY < sY))
-                newDistance = 0;
-        }
-        else if(rot >= 45 && rot < 46)
-        {
-            Log.d("ROTATION","45");
             if (nY < sY)
                 newDistance *= -1;
-            else if (!(nY > sY))
-                newDistance = 0;
-        }
-        else if(rot >= 135 && rot < 136)
+        } else if (rot >= 90 && rot < 180)
         {
-            Log.d("ROTATION","45-135");
             if (nX > sX)
                 newDistance *= -1;
-            else if (!(nX < sX))
-                newDistance = 0;
-        }
-        else if(rot >= 225 && rot < 226)
+        } else if (rot >= 180 && rot < 270)
         {
-            Log.d("ROTATION","45-225");
             if (nY > sY)
                 newDistance *= -1;
-            else if (!(nY < sY))
-                newDistance = 0;
-        }
-        else if(rot >= 315 && rot < 316)
-        {Log.d("ROTATION","45-315");
+        } else if (rot >= 270 && rot < 360)
+        {
             if (nX < sX)
                 newDistance *= -1;
-            else if (!(nX > sX))
-                newDistance = 0;
         }
+
 
         return newDistance;
 
