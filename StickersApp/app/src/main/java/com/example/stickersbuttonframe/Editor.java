@@ -335,7 +335,8 @@ public class Editor extends AppCompatActivity
                                             float newWidth = ((width + newDistance > 100) ? (width + newDistance) : 100);
                                             float newHeight = ((height + newDistance > 100) ? (height + newDistance) : 100);
                                             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (newWidth), (int) (newHeight));
-                                            RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams((int) (newWidth - 20), (int) (newHeight - 20));
+                                            RelativeLayout.LayoutParams lp2 = new RelativeLayout.LayoutParams((int) (newWidth), (int) (newHeight));
+                                            lp2.setMargins(25,25,25,25);
                                             newStickerView.setLayoutParams(lp);
                                             newSticker.setLayoutParams(lp2);
 
@@ -681,10 +682,6 @@ public class Editor extends AppCompatActivity
 
     }
 
-    private void scaleSticker()
-    {
-
-    }
 
 
 
