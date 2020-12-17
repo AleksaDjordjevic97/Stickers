@@ -1,9 +1,14 @@
  package com.example.stickersbuttonframe;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,6 +27,7 @@ public class MainActivity extends AppCompatActivity
     ImageButton btnGallery, btnCamera, btnPrivacyPolicy;
     private static final int SELECT_IMAGE_GALLERY = 1;
     private static final int SELECT_IMAGE_CAMERA = 1235;
+    private static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1236;
     String currentPhotoPath;
 
     @Override
@@ -34,12 +40,15 @@ public class MainActivity extends AppCompatActivity
         btnCamera = findViewById(R.id.btnCamera);
         btnPrivacyPolicy = findViewById(R.id.btnPrivacyPolicy);
 
+        checkPermissions();
+
         btnGallery.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                openGallery();
+                if(checkPermissions())
+                    openGallery();
             }
         });
 
@@ -48,7 +57,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                takeCameraPhoto();
+                if(checkPermissions())
+                    takeCameraPhoto();
             }
         });
 
@@ -62,12 +72,27 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private boolean checkPermissions()
+    {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+            return false;
+        }
+        else
+            return true;
+    }
+
     private void openGallery()
     {
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"),SELECT_IMAGE_GALLERY);
-
+        Intent galleryIntent = new Intent(
+                Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent,SELECT_IMAGE_GALLERY);
     }
 
 

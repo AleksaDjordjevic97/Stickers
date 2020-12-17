@@ -92,14 +92,8 @@ public class Editor extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                try
-                {
                     saveImage();
                     Toast.makeText(getApplicationContext(),"Image saved successfully to gallery!",Toast.LENGTH_SHORT).show();
-                } catch (FileNotFoundException e)
-                {
-                    e.printStackTrace();
-                }
             }
         });
 
@@ -150,29 +144,21 @@ public class Editor extends AppCompatActivity
         });
 
 
-
-
-
     }
 
-
-    private void mirrorSticker()
+    private File createImageFile() throws IOException
     {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
 
-        if(selectedSticker != null)
-        {
-            ImageView stickerImage = selectedSticker.findViewById(R.id.imgSticker);
-            BitmapDrawable drawable = (BitmapDrawable) stickerImage.getDrawable();
-            Bitmap bitmap = drawable.getBitmap();
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            Matrix matrix = new Matrix();
-            matrix.preScale(-1, 1);
-            Bitmap reflectionImage = Bitmap.createBitmap(bitmap, 0,
-                    0, width, height, matrix, false);
-            stickerImage.setImageBitmap(reflectionImage);
-        }
-
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     private void replaceFromCamera()
@@ -199,27 +185,24 @@ public class Editor extends AppCompatActivity
         }
     }
 
-    private File createImageFile() throws IOException
-    {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDir
-        );
-
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-
     private void replaceFromGallery()
     {
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"),SELECT_IMAGE_GALLERY);
+        Intent galleryIntent = new Intent(
+                Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent,SELECT_IMAGE_GALLERY);
+    }
+
+    private void saveImage()
+    {
+        deselectSticker();
+        viewGroup.setDrawingCacheEnabled(true);
+        viewGroup.buildDrawingCache();
+        Bitmap bm = viewGroup.getDrawingCache();
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "Stickers_" + timeStamp;
+        MediaStore.Images.Media.insertImage(getContentResolver(), bm, imageFileName , "This image was made by StickersApp");
+        viewGroup.setDrawingCacheEnabled(false);
     }
 
     private void removeSticker()
@@ -227,15 +210,94 @@ public class Editor extends AppCompatActivity
         viewGroup.removeView(selectedSticker);
     }
 
-    private void saveImage() throws FileNotFoundException
+
+    private void mirrorSticker()
     {
-        deselectSticker();
-        viewGroup.setDrawingCacheEnabled(true);
-        viewGroup.buildDrawingCache();
-        Bitmap bm = viewGroup.getDrawingCache();
-        MediaStore.Images.Media.insertImage(getContentResolver(), bm, "StickersApp" , "This image was made by StickersApp");
+
+        if(selectedSticker != null)
+        {
+            ImageView stickerImage = selectedSticker.findViewById(R.id.imgSticker);
+            BitmapDrawable drawable = (BitmapDrawable) stickerImage.getDrawable();
+            Bitmap bitmap = drawable.getBitmap();
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            Matrix matrix = new Matrix();
+            matrix.preScale(-1, 1);
+            Bitmap reflectionImage = Bitmap.createBitmap(bitmap, 0,
+                    0, width, height, matrix, false);
+            stickerImage.setImageBitmap(reflectionImage);
+        }
 
     }
+
+    private void animatePhotoButtons()
+    {
+        float cameraTravel;
+        float galleryTravel;
+
+        if(!openPhotoButtons)
+        {
+            cameraTravel = -200f;
+            galleryTravel = -330f;
+        }
+        else
+        {
+            cameraTravel = 0f;
+            galleryTravel = 0f;
+        }
+
+        ObjectAnimator btnCameraAnimator = ObjectAnimator.ofFloat(btnCamera,"translationY",cameraTravel);
+        btnCameraAnimator.setDuration(500);
+        btnCameraAnimator.start();
+
+        ObjectAnimator btnGalleryAnimator = ObjectAnimator.ofFloat(btnGallery,"translationY",galleryTravel);
+        btnGalleryAnimator.setDuration(500);
+        btnGalleryAnimator.start();
+
+        openPhotoButtons = !openPhotoButtons;
+    }
+
+    private void deselectSticker()
+    {
+        ImageView stickerImage;
+        ImageButton btnRemove,btnMirror,btnScale;
+        if(selectedSticker != null)
+        {
+            stickerImage = selectedSticker.findViewById(R.id.imgSticker);
+            btnRemove = selectedSticker.findViewById(R.id.btnRemoveSticker);
+            btnMirror = selectedSticker.findViewById(R.id.btnMirrorSticker);
+            btnScale = selectedSticker.findViewById(R.id.btnScaleSticker);
+            stickerImage.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            btnRemove.setVisibility(View.GONE);
+            btnMirror.setVisibility(View.GONE);
+            btnScale.setVisibility(View.GONE);
+
+            selectedSticker = null;
+        }
+
+    }
+
+    private void selectNewSticker(View newSticker)
+    {
+        ImageView stickerImage;
+        ImageButton btnRemove,btnMirror,btnScale;
+
+        deselectSticker();
+
+        selectedSticker = newSticker;
+        stickerImage = selectedSticker.findViewById(R.id.imgSticker);
+        btnRemove = selectedSticker.findViewById(R.id.btnRemoveSticker);
+        btnMirror = selectedSticker.findViewById(R.id.btnMirrorSticker);
+        btnScale = selectedSticker.findViewById(R.id.btnScaleSticker);
+
+        stickerImage.setBackgroundResource(R.drawable.sticker_border);
+        btnRemove.setVisibility(View.VISIBLE);
+        btnMirror.setVisibility(View.VISIBLE);
+        btnScale.setVisibility(View.VISIBLE);
+
+
+    }
+
 
     private void showStickers()
     {
@@ -503,6 +565,17 @@ public class Editor extends AppCompatActivity
 
     }
 
+    public class ViewHolder extends RecyclerView.ViewHolder
+    {
+        private ImageView img;
+        public ViewHolder(View view)
+        {
+            super(view);
+
+            img = view.findViewById(R.id.img);
+        }
+    }
+
 
 
     void getRawPoint(MotionEvent ev, int index, PointF point,View v) {
@@ -566,18 +639,6 @@ public class Editor extends AppCompatActivity
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder
-    {
-        private ImageView img;
-        public ViewHolder(View view)
-        {
-            super(view);
-
-            img = view.findViewById(R.id.img);
-        }
-    }
-
-
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
@@ -614,73 +675,7 @@ public class Editor extends AppCompatActivity
         }
     }
 
-    private void animatePhotoButtons()
-    {
-        float cameraTravel;
-        float galleryTravel;
 
-        if(!openPhotoButtons)
-        {
-            cameraTravel = -200f;
-            galleryTravel = -330f;
-        }
-        else
-        {
-            cameraTravel = 0f;
-            galleryTravel = 0f;
-        }
-
-        ObjectAnimator btnCameraAnimator = ObjectAnimator.ofFloat(btnCamera,"translationY",cameraTravel);
-        btnCameraAnimator.setDuration(500);
-        btnCameraAnimator.start();
-
-        ObjectAnimator btnGalleryAnimator = ObjectAnimator.ofFloat(btnGallery,"translationY",galleryTravel);
-        btnGalleryAnimator.setDuration(500);
-        btnGalleryAnimator.start();
-
-        openPhotoButtons = !openPhotoButtons;
-    }
-
-    private void deselectSticker()
-    {
-        ImageView stickerImage;
-        ImageButton btnRemove,btnMirror,btnScale;
-        if(selectedSticker != null)
-        {
-            stickerImage = selectedSticker.findViewById(R.id.imgSticker);
-            btnRemove = selectedSticker.findViewById(R.id.btnRemoveSticker);
-            btnMirror = selectedSticker.findViewById(R.id.btnMirrorSticker);
-            btnScale = selectedSticker.findViewById(R.id.btnScaleSticker);
-            stickerImage.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            btnRemove.setVisibility(View.GONE);
-            btnMirror.setVisibility(View.GONE);
-            btnScale.setVisibility(View.GONE);
-
-            selectedSticker = null;
-        }
-
-    }
-
-    private void selectNewSticker(View newSticker)
-    {
-        ImageView stickerImage;
-        ImageButton btnRemove,btnMirror,btnScale;
-
-        deselectSticker();
-
-        selectedSticker = newSticker;
-        stickerImage = selectedSticker.findViewById(R.id.imgSticker);
-        btnRemove = selectedSticker.findViewById(R.id.btnRemoveSticker);
-        btnMirror = selectedSticker.findViewById(R.id.btnMirrorSticker);
-        btnScale = selectedSticker.findViewById(R.id.btnScaleSticker);
-
-        stickerImage.setBackgroundResource(R.drawable.sticker_border);
-        btnRemove.setVisibility(View.VISIBLE);
-        btnMirror.setVisibility(View.VISIBLE);
-        btnScale.setVisibility(View.VISIBLE);
-
-
-    }
 
 
 
