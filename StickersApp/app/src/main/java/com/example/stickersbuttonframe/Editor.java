@@ -25,16 +25,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -53,7 +51,6 @@ public class Editor extends AppCompatActivity
     TypedArray stickerArray;
     boolean openPhotoButtons = false;
     String currentPhotoPath;
-    FrameLayout frm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -62,13 +59,11 @@ public class Editor extends AppCompatActivity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_editor);
 
-        frm = findViewById(R.id.frmImageLayout);
         btnSticker = findViewById(R.id.btnSticker);
         btnSave = findViewById(R.id.btnSave);
         btnPhoto = findViewById(R.id.btnPhoto);
         btnCamera = findViewById(R.id.btnCameraE);
         btnGallery = findViewById(R.id.btnGalleryE);
-
         imgUser = findViewById(R.id.imgSeleceted);
         viewGroup = findViewById(R.id.frmImageLayout);
 
@@ -134,7 +129,7 @@ public class Editor extends AppCompatActivity
         });
 
 
-        frm.setOnClickListener(new View.OnClickListener()
+        viewGroup.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
@@ -361,10 +356,10 @@ public class Editor extends AppCompatActivity
                             }
                         });
 
-
-
                         viewGroup.addView(newStickerView);
                         selectNewSticker(newStickerView);
+                        centerSticker(newStickerView);
+
 
                         btnScaleSticker.setOnTouchListener(new View.OnTouchListener()
                         {
@@ -441,14 +436,13 @@ public class Editor extends AppCompatActivity
                             @Override
                             public boolean onTouch(View v, MotionEvent event)
                             {
-                                selectNewSticker(newStickerView);
 
                                 switch (event.getActionMasked())
                                 {
 
-                                    case MotionEvent.ACTION_MOVE :
+                                    case MotionEvent.ACTION_MOVE:
 
-                                        if(event.getPointerCount() == 2)
+                                        if (event.getPointerCount() == 2)
                                         {
                                             modeMove = false;
 
@@ -458,12 +452,12 @@ public class Editor extends AppCompatActivity
 //                                                    .setDuration(0)
 //                                                    .start();
 
-                                          //  final float dX =event.getX(0) - event.getX(1);
-                                           // final float dY =event.getY(0) - event.getY(1);
-                                           // float newdistance = (float) Math.sqrt(dX * dX + dY * dY);
-                                          //  float distance = newdistance - olddistance;
-                                          //  float newWidth = ((width+distance > 150) ? (width + distance) : 150 );
-                                          //  float newHeight = ((height+distance > 150) ? (height + distance) : 150 );
+                                            //  final float dX =event.getX(0) - event.getX(1);
+                                            // final float dY =event.getY(0) - event.getY(1);
+                                            // float newdistance = (float) Math.sqrt(dX * dX + dY * dY);
+                                            //  float distance = newdistance - olddistance;
+                                            //  float newWidth = ((width+distance > 150) ? (width + distance) : 150 );
+                                            //  float newHeight = ((height+distance > 150) ? (height + distance) : 150 );
 //                                            FrameLayout.LayoutParams lp= new FrameLayout.LayoutParams(newStickerView.getWidth(),newStickerView.getHeight());
 //                                            newStickerView.setLayoutParams(lp);
 
@@ -472,32 +466,34 @@ public class Editor extends AppCompatActivity
                                                 PointF nfPoint = new PointF();
                                                 PointF nsPoint = new PointF();
 
-                                                getRawPoint(event, mPtrID1, nsPoint,newStickerView);
-                                                getRawPoint(event, mPtrID2, nfPoint,newStickerView);
+                                                getRawPoint(event, mPtrID1, nsPoint, newStickerView);
+                                                getRawPoint(event, mPtrID2, nfPoint, newStickerView);
 
                                                 mAngle = angleBetweenLines(mFPoint, mSPoint, nfPoint, nsPoint);
 
-                                                mAngle = (mAngle+oldRotation)%360;
+                                                mAngle = (mAngle + oldRotation) % 360;
 
-                                                newSticker.setPivotX(newSticker.getWidth()/2);
-                                                newSticker.setPivotY(newSticker.getHeight()/2);
+                                                newSticker.setPivotX(newSticker.getWidth() / 2);
+                                                newSticker.setPivotY(newSticker.getHeight() / 2);
 
                                                 newStickerView.setRotation(mAngle);
                                             }
 
-                                        }
-                                        else if(event.getPointerCount() == 1 && modeMove)
+                                        } else if (event.getPointerCount() == 1 && modeMove)
                                         {
-                                            newStickerView.animate()
-                                                    .x(event.getRawX() + mX)
-                                                    .y(event.getRawY() + mY)
-                                                    .setDuration(0)
-                                                    .start();
+                                            if (newStickerView == selectedSticker)
+                                                newStickerView.animate()
+                                                        .x(event.getRawX() + mX)
+                                                        .y(event.getRawY() + mY)
+                                                        .setDuration(0)
+                                                        .start();
                                         }
 
                                         break;
 
-                                    case MotionEvent.ACTION_DOWN :
+                                    case MotionEvent.ACTION_DOWN:
+                                        selectNewSticker(newStickerView);
+
                                         mX = newStickerView.getX() - event.getRawX();
                                         mY = newStickerView.getY() - event.getRawY();
 
@@ -513,8 +509,8 @@ public class Editor extends AppCompatActivity
 //                                        olddistance = (float) Math.sqrt(odX * odX + odY * odY);
 
                                         mPtrID2 = event.getPointerId(event.getActionIndex());
-                                        getRawPoint(event, mPtrID1, mSPoint,newStickerView);
-                                        getRawPoint(event, mPtrID2, mFPoint,newStickerView);
+                                        getRawPoint(event, mPtrID1, mSPoint, newStickerView);
+                                        getRawPoint(event, mPtrID2, mFPoint, newStickerView);
 
                                         oldRotation = newStickerView.getRotation();
 
@@ -525,7 +521,7 @@ public class Editor extends AppCompatActivity
                                         mPtrID1 = INVALID_POINTER_ID;
                                         break;
 
-                                    case MotionEvent.ACTION_POINTER_UP :
+                                    case MotionEvent.ACTION_POINTER_UP:
 //                                        height = newStickerView.getHeight();
 //                                        width = newStickerView.getWidth();
 
@@ -537,10 +533,12 @@ public class Editor extends AppCompatActivity
                                         mPtrID2 = INVALID_POINTER_ID;
                                         break;
 
-                                    default :
+                                    default:
                                         break;
                                 }
                                 return true;
+
+
                             }
                         });
 
@@ -576,6 +574,25 @@ public class Editor extends AppCompatActivity
         }
     }
 
+    private void centerSticker(final View newStickerView)
+    {
+        newStickerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
+        {
+            @Override
+            public void onGlobalLayout()
+            {
+                float nsW = newStickerView.getWidth()/2;
+                float nsH = newStickerView.getHeight()/2;
+                newStickerView.animate()
+                        .x(viewGroup.getWidth()/2 - nsW)
+                        .y(viewGroup.getHeight()/2 - nsH)
+                        .setDuration(0)
+                        .start();
+
+                newStickerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+    }
 
 
     void getRawPoint(MotionEvent ev, int index, PointF point,View v) {
